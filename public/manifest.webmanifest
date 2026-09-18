@@ -1,0 +1,18 @@
+{
+  "name": "KSEB Slab Watchdog - കരന്റ് വാച്ച്ഡോഗ്",
+  "short_name": "KSEB വാച്ച്ഡോഗ്",
+  "description": "Kerala electricity meter tracker, daily burn rate predictor, slab cliff radar and appliance inspector",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070b12",
+  "theme_color": "#00f59b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

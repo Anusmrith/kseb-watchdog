@@ -1,0 +1,14 @@
+{
+  "name": "kseb-slab-watchdog",
+  "version": "1.0.0",
+  "description": "⚡ KSEB Slab Watchdog (കരന്റ് വാച്ച്ഡോഗ്) - Kerala electricity meter tracker, burn rate predictor, slab cliff radar and appliance inspector",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0"
+  }
+}

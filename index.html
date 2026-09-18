@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ KSEB SLAB WATCHDOG (കരന്റ് വാച്ച്ഡോഗ്)</title>
+  <meta name="description" content="Kerala KSEB electricity meter tracker, daily burn rate predictor, 500-unit slab cliff radar, and household appliance inspector.">
+  <meta name="theme-color" content="#070b12">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="KSEB വാച്ച്ഡോഗ്">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icon.svg">
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-icon" aria-hidden="true">⚡</div>
+        <div class="brand-text">
+          <h1 id="app-main-title">⚡ KSEB SLAB WATCHDOG <span style="font-size: 0.9em; opacity: 0.9;">(കരന്റ് വാച്ച്ഡോഗ്)</span></h1>
+          <p class="tagline" data-i18n="tagline">സ്ലാബ് മാറി ബില്ല് ഷോക്കാവാതിരിക്കാൻ ഒരു മുൻകരുതൽ!</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="lang-toggle-btn" class="pill-btn" title="Toggle Language">
+          <span class="icon">🌐</span>
+          <span id="lang-btn-text">മലയാളം / EN</span>
+        </button>
+        <button id="sound-toggle-btn" class="pill-btn active" title="Audio Effects">
+          <span id="sound-icon">🔊</span>
+          <span id="sound-text" data-i18n="soundOn">ശബ്ദം ഓൺ</span>
+        </button>
+        <button id="settings-btn" class="pill-btn" title="Settings">
+          <span class="icon">⚙️</span>
+          <span data-i18n="settings">Settings</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="dashboard-grid">
+      <!-- 1. METER READING & PREDICTOR -->
+      <section class="card-section meter-section" id="meter-predictor-card">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="icon">📊</span>
+            <span data-i18n="meterSectionTitle">METER READING & PREDICTOR (മീറ്റർ റീഡിംഗ് & പ്രവചനം)</span>
+          </h2>
+          <span class="cycle-badge" id="cycle-display-badge" data-i18n="bimonthlyCycle">60-day Bi-monthly Cycle</span>
+        </div>
+
+        <div class="meter-inputs-grid">
+          <!-- Last Reading Box -->
+          <div class="input-box">
+            <label for="last-reading-input" data-i18n="lastReading">കഴിഞ്ഞ റീഡിംഗ് (Last Reading)</label>
+            <div class="reading-field">
+              <input type="number" id="last-reading-input" value="14200" min="0" step="1">
+              <span class="unit-tag">kWh</span>
+            </div>
+            <div class="date-row">
+              <input type="date" id="last-reading-date" value="2026-07-01">
+              <span class="sub-text" id="last-date-label">July 1</span>
+            </div>
+          </div>
+
+          <!-- Current Reading Box -->
+          <div class="input-box">
+            <label for="current-reading-input" data-i18n="currentReading">ഇപ്പോഴത്തെ റീഡിംഗ് (Current Reading)</label>
+            <div class="reading-field">
+              <input type="number" id="current-reading-input" value="14480" min="0" step="1">
+              <span class="unit-tag">kWh</span>
+            </div>
+            <div class="date-row">
+              <input type="date" id="current-reading-date" value="2026-08-05">
+              <span class="sub-text" id="current-date-label">Aug 5</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Elapsed & Consumed Banner -->
+        <div class="consumption-summary-bar">
+          <div class="calc-pill">
+            <span class="icon">⚡</span>
+            <span>--> </span>
+            <span class="highlight" id="units-consumed-display">280 Units</span>
+            <span class="elapsed" id="elapsed-days-display">(35 days elapsed)</span>
+          </div>
+          <div class="calc-pill">
+            <span class="elapsed" id="remaining-days-display">25 days remaining in cycle</span>
+          </div>
+        </div>
+
+        <!-- Twin Highlight Cards: Burn Rate & Projection -->
+        <div class="metrics-twin-grid">
+          <!-- Daily Burn Rate Card -->
+          <div class="metric-card burn-rate">
+            <div class="metric-header">
+              <span class="metric-title" data-i18n="dailyBurnRate">🔥 DAILY BURN RATE</span>
+              <span class="icon" style="color: var(--accent-amber);">⚡/Day</span>
+            </div>
+            <div class="metric-value-row">
+              <span class="metric-number" id="daily-burn-rate-val">8.0</span>
+              <span class="metric-unit" data-i18n="unitsPerDay">Units/Day</span>
+            </div>
+            <div class="metric-footer">
+              <span id="burn-intensity-text">ശരാശരി പ്രതിദിന ഉപയോഗം</span>
+              <span style="font-size: 0.8rem; opacity: 0.8;">(280 U / 35 Days)</span>
+            </div>
+          </div>
+
+          <!-- Day 60 Projection Card -->
+          <div class="metric-card projection" id="projection-card">
+            <div class="metric-header">
+              <span class="metric-title" data-i18n="projectedDay60">🔮 PROJECTED DAY 60</span>
+              <button id="view-bill-btn" class="pill-btn" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">
+                🧾 <span data-i18n="billBreakdownTitle">വിശദാംശങ്ങൾ</span>
+              </button>
+            </div>
+            <div class="metric-value-row">
+              <span class="metric-number" id="projected-units-val">480</span>
+              <span class="metric-unit" data-i18n="units">Units</span>
+            </div>
+            <div class="metric-footer">
+              <span data-i18n="estimatedBill">Est. Bill:</span>
+              <span class="bill-estimate-tag" id="estimated-bill-val">₹3,140</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. SLAB CLIFF ALERT -->
+      <section class="card-section cliff-section" id="slab-cliff-card">
+        <div class="section-header">
+          <h2 class="section-title" style="color: #f59e0b;">
+            <span class="icon">⚠️</span>
+            <span data-i18n="cliffSectionTitle">SLAB CLIFF ALERT</span>
+          </h2>
+          <span class="cliff-threshold-tag" id="cliff-distance-badge">20 Units Away from Cliff!</span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+          <div class="progress-labels">
+            <span class="progress-metric" id="progress-units-label">280 / 500 Units</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted);" id="progress-percentage-label">56% of safe slab</span>
+          </div>
+          <div class="custom-progress-track">
+            <div class="custom-progress-fill striped" id="custom-progress-fill" style="width: 56%;"></div>
+            <div class="cliff-marker-line" title="500-Unit Cliff"></div>
+          </div>
+        </div>
+
+        <!-- Cliff Alert Warning Banner -->
+        <div class="cliff-banner warning" id="cliff-banner-box">
+          <div class="cliff-icon-col">⚠️</div>
+          <div class="cliff-content-col">
+            <h3 id="cliff-alert-headline">"ALERT: You are 20 units away from the 500-unit cliff!</h3>
+            <p id="cliff-alert-body">
+              If you cross 500 units, your bill jumps by <span class="cliff-jump-highlight" id="cliff-jump-amount">₹1,420</span>.
+            </p>
+            <div class="action-tip" id="cliff-action-tip">
+              💡 <strong>നിർദ്ദേശം:</strong> Limit AC to 6 hrs/day to stay safely in Slab 5.
+            </div>
+          </div>
+        </div>
+
+        <div class="cliff-footer-actions">
+          <button id="open-slab-matrix-btn" class="slab-matrix-link">
+            🔍 <span data-i18n="viewSlabMatrix">കെ.എസ്.ഇ.ബി താരിഫ് സ്ലാബുകൾ കാണുക</span>
+          </button>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">
+            LT-1A Domestic (Bi-monthly 60-Day Cycle)
+          </span>
+        </div>
+      </section>
+
+      <!-- 3. APPLIANCE INSPECTOR ("ആരാണ് ലൈറ്റ് ഓഫ് ചെയ്യാത്തത്?") -->
+      <section class="card-section inspector-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="icon">🔌</span>
+            <span data-i18n="inspectorSectionTitle">"ആരാണ് ലൈറ്റ് ഓഫ് ചെയ്യാത്തത്?" (Appliance Inspector)</span>
+          </h2>
+        </div>
+        <p class="inspector-header-sub" data-i18n="inspectorSubtitle">
+          വീട്ടിലെ പ്രധാന കറന്റ് തീറ്റക്കാരെ കണ്ടെത്തൂ, സ്ലാബ് കയറാതെ കാക്കൂ!
+        </p>
+
+        <!-- Live Appliance List -->
+        <div class="appliances-list" id="appliances-container">
+          <!-- Populated by JavaScript -->
+        </div>
+
+        <div class="inspector-actions-row">
+          <button id="add-appliance-btn" class="add-appliance-btn">
+            <span data-i18n="addAppliance">+ പുതിയ ഉപകരണം ചേർക്കുക</span>
+          </button>
+          <div style="font-size: 0.825rem; color: var(--accent-green);" data-i18n="liveWhatIfTip">
+            💡 സ്ലൈഡറുകൾ നീക്കി നോക്കൂ: AC ഒരു മണിക്കൂർ കുറച്ചാൽ എത്ര രൂപ ലാഭിക്കാമെന്ന് തത്സമയം കാണാം!
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. SHARE SUMMARY TO FAMILY WHATSAPP -->
+      <section class="card-section share-card-container">
+        <button id="whatsapp-share-trigger-btn" class="share-main-btn">
+          <svg class="whatsapp-icon-svg" viewBox="0 0 24 24">
+            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.941-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.299.144.347.491 1.2.534 1.288.043.087.072.188.014.303-.058.116-.087.188-.173.289l-.26.303c-.087.087-.179.182-.077.357.101.173.452.744.97 1.205.666.593 1.228.777 1.401.864.173.087.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.144.39-.087s1.011.477 1.184.564.289.13.332.202c.043.072.043.419-.101.824z"/>
+          </svg>
+          <span data-i18n="shareBtn">📤 Share Summary to Family WhatsApp</span>
+        </button>
+      </section>
+    </main>
+
+    <!-- WhatsApp Share Modal -->
+    <div class="modal-overlay" id="whatsapp-modal">
+      <div class="modal-window">
+        <div class="modal-header">
+          <h2 data-i18n="shareModalTitle">📲 ഫാമിലി വാട്സാപ്പ് മെസ്സേജ് പ്രിവ്യൂ</h2>
+          <button class="modal-close-btn" id="close-whatsapp-modal">&times;</button>
+        </div>
+
+        <!-- Tone selector tabs -->
+        <div class="tone-selector-row">
+          <button class="tone-btn active" data-tone="dad" data-i18n="messageToneSternDad">👨‍🦳 അപ്പന്റെ കർക്കശ മുന്നറിയിപ്പ്</button>
+          <button class="tone-btn" data-tone="friendly" data-i18n="messageToneFriendly">😊 ശാന്തമായ ഓർമ്മപ്പെടുത്തൽ</button>
+          <button class="tone-btn" data-tone="english" data-i18n="messageToneEnglish">🌐 English Summary</button>
+        </div>
+
+        <!-- Preview Box -->
+        <div class="whatsapp-chat-bubble" id="whatsapp-preview-content"></div>
+
+        <div class="modal-action-buttons">
+          <button class="action-btn-primary" id="copy-whatsapp-text-btn">
+            📋 <span data-i18n="copyMessage">കോപ്പി ചെയ്യുക</span>
+          </button>
+          <button class="action-btn-secondary" id="direct-whatsapp-send-btn">
+            🚀 <span data-i18n="openWhatsApp">വാട്സാപ്പിൽ അയക്കുക</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bill Breakdown Modal -->
+    <div class="modal-overlay" id="bill-breakdown-modal">
+      <div class="modal-window">
+        <div class="modal-header">
+          <h2 data-i18n="billBreakdownTitle">🧾 KSEB Bill Breakdown (LT-1A)</h2>
+          <button class="modal-close-btn" id="close-breakdown-modal">&times;</button>
+        </div>
+        <div id="breakdown-content">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settings-modal">
+      <div class="modal-window">
+        <div class="modal-header">
+          <h2 data-i18n="settings">⚙️ Settings</h2>
+          <button class="modal-close-btn" id="close-settings-modal">&times;</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1.2rem; padding: 0.5rem 0;">
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem;">
+              Connection Phase
+            </label>
+            <div style="display: flex; gap: 0.75rem;">
+              <button id="phase-1-btn" class="pill-btn active" style="flex: 1; justify-content: center;" data-i18n="phase1">
+                Single Phase (1-Phase)
+              </button>
+              <button id="phase-3-btn" class="pill-btn" style="flex: 1; justify-content: center;" data-i18n="phase3">
+                Three Phase (3-Phase)
+              </button>
+            </div>
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem;">
+              Billing Cycle Duration
+            </label>
+            <select id="cycle-duration-select" style="width: 100%; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm); padding: 0.5rem;">
+              <option value="60" selected>60 Days (Standard Kerala LT-1A Bi-Monthly)</option>
+              <option value="30">30 Days (Monthly Billing Cycle)</option>
+            </select>
+          </div>
+          <button id="reset-all-data-btn" class="action-btn-secondary" style="margin-top: 0.5rem; color: #f87171; border-color: rgba(239, 68, 68, 0.3);">
+            ⚠️ <span data-i18n="resetDefaults">റീസെറ്റ് ചെയ്യുക (Reset Defaults)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Custom Appliance Modal -->
+    <div class="modal-overlay" id="add-appliance-modal">
+      <div class="modal-window">
+        <div class="modal-header">
+          <h2 data-i18n="newApplianceTitle">+ Add Custom Appliance</h2>
+          <button class="modal-close-btn" id="close-add-modal">&times;</button>
+        </div>
+        <form id="new-appliance-form" style="display: flex; flex-direction: column; gap: 1rem;">
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.3rem;" data-i18n="applianceName">
+              Appliance Name
+            </label>
+            <input type="text" id="new-appliance-name" required placeholder="e.g. Induction Cooker / വാഷിംഗ് മെഷീൻ" style="width: 100%; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm); padding: 0.6rem;">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div>
+              <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.3rem;" data-i18n="wattage">
+                Power (Watts)
+              </label>
+              <input type="number" id="new-appliance-watts" required value="750" min="5" max="10000" style="width: 100%; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm); padding: 0.6rem;">
+            </div>
+            <div>
+              <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.3rem;" data-i18n="dailyUsage">
+                Daily Hours
+              </label>
+              <input type="number" id="new-appliance-hours" required value="2" min="0.1" max="24" step="0.5" style="width: 100%; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm); padding: 0.6rem;">
+            </div>
+          </div>
+          <button type="submit" class="action-btn-primary" style="margin-top: 0.5rem;" data-i18n="saveAppliance">
+            Add Appliance
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
